@@ -11,4 +11,6 @@ pub enum Error {
     EmptyMembers = 5,
     DuplicateMember = 6,
     NotAuthorized = 7,
+    InsufficientBalance = 8,
+    InvalidAmount = 9,
 }
