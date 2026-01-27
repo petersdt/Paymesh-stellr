@@ -7,4 +7,8 @@ pub enum Error {
     InvalidInput = 1,
     AlreadyExists = 2,
     NotFound = 3,
+    InvalidTotalPercentage = 4,
+    EmptyMembers = 5,
+    DuplicateMember = 6,
+    NotAuthorized = 7,
 }
