@@ -30,7 +30,7 @@ fn test_create_and_get_success() {
     assert_eq!(result.name, name);
     assert_eq!(result.creator, creator);
     assert_eq!(result.members.len(), 2);
-    
+
     // Check specific member values
     let m1 = result.members.get(0).unwrap();
     assert_eq!(m1.address, member1);
@@ -230,9 +230,12 @@ fn test_get_groups_by_creator() {
     let creator1 = Address::generate(&env);
     let id1 = BytesN::from_array(&env, &[1u8; 32]);
     let name1 = String::from_str(&env, "Group 1");
-    
+
     let mut members = Vec::new(&env);
-    members.push_back(GroupMember { address: Address::generate(&env), percentage: 100 });
+    members.push_back(GroupMember {
+        address: Address::generate(&env),
+        percentage: 100,
+    });
 
     client.create(&id1, &name1, &creator1, &members);
 

@@ -22,13 +22,24 @@ pub struct AutoShareContract;
 impl AutoShareContract {
     /// Creates a new AutoShare plan.
     /// Requirement: create_autoshare should store data and emit an event.
-    pub fn create(env: Env, id: BytesN<32>, name: String, creator: Address, members: Vec<base::types::GroupMember>) {
+    pub fn create(
+        env: Env,
+        id: BytesN<32>,
+        name: String,
+        creator: Address,
+        members: Vec<base::types::GroupMember>,
+    ) {
         autoshare_logic::create_autoshare(env, id, name, creator, members).unwrap();
     }
 
     /// Update members of an existing AutoShare plan.
     /// Requirement: Only creator can update. Validates percentages.
-    pub fn update_members(env: Env, id: BytesN<32>, caller: Address, new_members: Vec<base::types::GroupMember>) {
+    pub fn update_members(
+        env: Env,
+        id: BytesN<32>,
+        caller: Address,
+        new_members: Vec<base::types::GroupMember>,
+    ) {
         autoshare_logic::update_members(env, id, caller, new_members).unwrap();
     }
 

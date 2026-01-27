@@ -145,7 +145,7 @@ pub fn get_groups_by_creator(env: Env, creator: Address) -> Vec<AutoShareDetails
 
 pub fn is_group_member(env: Env, id: BytesN<32>, address: Address) -> Result<bool, Error> {
     let details = get_autoshare(env, id)?;
-    
+
     for member in details.members.iter() {
         if member.address == address {
             return Ok(true);
