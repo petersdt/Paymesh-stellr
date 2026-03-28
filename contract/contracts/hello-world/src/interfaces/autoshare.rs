@@ -200,6 +200,14 @@ pub trait AutoShareTrait {
     /// Returns all distribution history for a member.
     fn get_member_distributions(env: Env, member: Address) -> Vec<DistributionRecord>;
 
+    /// Returns paginated distribution history for a member.
+    fn get_member_distrib_paginated(
+        env: Env,
+        member: Address,
+        offset: u32,
+        limit: u32,
+    ) -> (Vec<DistributionRecord>, u32);
+
     // ============================================================================
     // Usage Tracking
     // ============================================================================
@@ -246,4 +254,7 @@ pub trait AutoShareTrait {
 
     /// Returns the current minimum contribution amount.
     fn get_min_contribution(env: Env) -> i128;
+
+    /// Cancels an active fundraising campaign. Only the group creator can cancel.
+    fn cancel_fundraising(env: Env, id: BytesN<32>, caller: Address);
 }

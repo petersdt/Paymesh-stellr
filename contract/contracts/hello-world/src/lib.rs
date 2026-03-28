@@ -383,6 +383,16 @@ impl AutoShareContract {
         autoshare_logic::get_member_distributions(env, member)
     }
 
+    /// Returns paginated distribution history for a member.
+    pub fn get_member_distrib_paginated(
+        env: Env,
+        member: Address,
+        offset: u32,
+        limit: u32,
+    ) -> (Vec<base::types::MemberDistributionRecord>, u32) {
+        autoshare_logic::get_member_distrib_paginated(env, member, offset, limit)
+    }
+
     // ============================================================================
     // Usage Tracking
     // ============================================================================
@@ -522,6 +532,11 @@ impl AutoShareContract {
     /// Returns the member count of a group without loading the full member list.
     pub fn get_group_member_count(env: Env, id: BytesN<32>) -> u32 {
         autoshare_logic::get_group_member_count(env, id).unwrap_or(0)
+    }
+
+    /// Cancels an active fundraising campaign. Only the group creator can cancel.
+    pub fn cancel_fundraising(env: Env, id: BytesN<32>, caller: Address) {
+        autoshare_logic::cancel_fundraising(env, id, caller).unwrap();
     }
 }
 

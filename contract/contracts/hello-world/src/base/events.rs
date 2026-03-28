@@ -152,6 +152,19 @@ pub fn emit_member_added(env: &Env, group_id: BytesN<32>, member: Address, perce
     .publish(env);
 }
 
+#[contractevent]
+#[derive(Clone)]
+pub struct MemberRemoved {
+    #[topic]
+    pub group_id: BytesN<32>,
+    #[topic]
+    pub member: Address,
+}
+
+pub fn emit_member_removed(env: &Env, group_id: BytesN<32>, member: Address) {
+    MemberRemoved { group_id, member }.publish(env);
+}
+
 #[contractevent(data_format = "single-value")]
 #[derive(Clone)]
 pub struct FundraisingStarted {
@@ -294,6 +307,22 @@ pub fn emit_usage_fee_updated(env: &Env, admin: Address, old_fee: u32, new_fee: 
         admin,
         old_fee,
         new_fee,
+    }
+    .publish(env);
+}
+
+#[contractevent]
+#[derive(Clone)]
+pub struct FundraisingCancelled {
+    #[topic]
+    pub group_id: BytesN<32>,
+    pub total_raised: i128,
+}
+
+pub fn emit_fundraising_cancelled(env: &Env, group_id: BytesN<32>, total_raised: i128) {
+    FundraisingCancelled {
+        group_id,
+        total_raised,
     }
     .publish(env);
 }

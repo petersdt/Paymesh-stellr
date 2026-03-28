@@ -1,9 +1,10 @@
 use crate::base::errors::Error;
 use crate::base::events::{
-    emit_contribution, emit_creator_is_member, emit_distribution, emit_fundraising_target_updated,
-    emit_max_members_updated, emit_usage_fee_updated, AdminTransferred, AutoshareCreated,
-    AutoshareUpdated, ContractPaused, ContractUnpaused, FundraisingStarted, GroupActivated,
-    GroupDeactivated, GroupDeleted, GroupNameUpdated, GroupOwnershipTransferred, Withdrawal,
+    emit_contribution, emit_creator_is_member, emit_distribution, emit_fundraising_cancelled,
+    emit_fundraising_target_updated, emit_max_members_updated, emit_member_removed,
+    emit_usage_fee_updated, AdminTransferred, AutoshareCreated, AutoshareUpdated, ContractPaused,
+    ContractUnpaused, FundraisingStarted, GroupActivated, GroupDeactivated, GroupDeleted,
+    GroupNameUpdated, GroupOwnershipTransferred, Withdrawal,
 };
 
 use crate::base::types::{
@@ -12,10 +13,6 @@ use crate::base::types::{
     MemberDistributionRecord, PaymentHistory,
 };
 use soroban_sdk::{contracttype, token, Address, BytesN, Env, String, Vec};
-
-extern crate alloc;
-use alloc::string::String as AllocString;
-use alloc::string::ToString;
 
 #[contracttype]
 pub enum DataKey {
@@ -57,12 +54,12 @@ fn bump_persistent<K: soroban_sdk::IntoVal<Env, soroban_sdk::Val>>(env: &Env, ke
 }
 
 fn is_valid_name(name: &String) -> bool {
-    let alloc_str: AllocString = name.to_string();
-    let trimmed = alloc_str.trim();
-    if trimmed.is_empty() {
+    // Check if name is empty
+    if name.len() == 0 {
         return false;
     }
-    if alloc_str.len() > 60 {
+    // Check if name exceeds maximum length
+    if name.len() > 60 {
         return false;
     }
     true
@@ -608,6 +605,10 @@ pub fn remove_group_member(
         updater: caller,
     }
     .publish(&env);
+
+    // Emit MemberRemoved event for indexers
+    emit_member_removed(&env, id.clone(), member_address.clone());
+
     Ok(())
 }
 
@@ -1192,6 +1193,42 @@ pub fn get_member_distributions(env: Env, member: Address) -> Vec<MemberDistribu
         .persistent()
         .get(&member_dist_key)
         .unwrap_or(Vec::new(&env))
+}
+
+pub fn get_member_distrib_paginated(
+    env: Env,
+    member: Address,
+    offset: u32,
+    limit: u32,
+) -> (Vec<MemberDistributionRecord>, u32) {
+    let member_dist_key = DataKey::MemberDistributions(member);
+    let distributions: Vec<MemberDistributionRecord> = env
+        .storage()
+        .persistent()
+        .get(&member_dist_key)
+        .unwrap_or(Vec::new(&env));
+
+    let total = distributions.len();
+    if total == 0 {
+        return (Vec::new(&env), 0);
+    }
+
+    bump_persistent(&env, &member_dist_key);
+
+    // Cap limit at 20
+    let actual_limit = limit.min(20);
+    let mut paginated_distributions = Vec::new(&env);
+
+    if actual_limit > 0 && offset < total {
+        let end = offset.saturating_add(actual_limit).min(total);
+        for i in offset..end {
+            if let Some(distribution) = distributions.get(i) {
+                paginated_distributions.push_back(distribution);
+            }
+        }
+    }
+
+    (paginated_distributions, total)
 }
 
 // ============================================================================
@@ -2657,4 +2694,57 @@ pub fn get_group_member_count(env: Env, id: BytesN<32>) -> Result<u32, Error> {
         .get(&key)
         .ok_or(Error::NotFound)?;
     Ok(details.members.len() as u32)
+}
+
+/// Cancels an active fundraising campaign.
+/// Only the group creator can cancel. Does NOT refund contributions already distributed to members.
+pub fn cancel_fundraising(env: Env, id: BytesN<32>, caller: Address) -> Result<(), Error> {
+    // 1. Require caller authentication
+    caller.require_auth();
+
+    // 2. Check if contract is paused
+    if get_paused_status(&env) {
+        return Err(Error::ContractPaused);
+    }
+
+    // 3. Verify group exists and caller is the creator
+    let autoshare_key = DataKey::AutoShare(id.clone());
+    let details: AutoShareDetails = env
+        .storage()
+        .persistent()
+        .get(&autoshare_key)
+        .ok_or(Error::NotFound)?;
+    bump_persistent(&env, &autoshare_key);
+
+    if details.creator != caller {
+        return Err(Error::Unauthorized);
+    }
+
+    // 4. Read fundraising config and verify it's active
+    let fundraising_key = DataKey::GroupFundraising(id.clone());
+    let mut fundraising_config: FundraisingConfig = env
+        .storage()
+        .persistent()
+        .get(&fundraising_key)
+        .ok_or(Error::FundraisingNotActive)?;
+    bump_persistent(&env, &fundraising_key);
+
+    if !fundraising_config.is_active {
+        return Err(Error::FundraisingNotActive);
+    }
+
+    // 5. Set is_active to false
+    let total_raised_at_cancellation = fundraising_config.total_raised;
+    fundraising_config.is_active = false;
+
+    // 6. Store updated config
+    env.storage()
+        .persistent()
+        .set(&fundraising_key, &fundraising_config);
+    bump_persistent(&env, &fundraising_key);
+
+    // 7. Emit FundraisingCancelled event
+    emit_fundraising_cancelled(&env, id.clone(), total_raised_at_cancellation);
+
+    Ok(())
 }
