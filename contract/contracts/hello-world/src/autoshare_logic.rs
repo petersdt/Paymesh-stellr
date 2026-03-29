@@ -62,6 +62,24 @@ fn is_valid_name(name: &String) -> bool {
     if name.len() > 60 {
         return false;
     }
+
+    let name_len = name.len() as usize;
+    let mut buf = [0u8; 60];
+    name.copy_into_slice(&mut buf[..name_len]);
+
+    let mut only_whitespace = true;
+    for i in 0..name_len {
+        let b = buf[i];
+        if b != b' ' && b != b'\t' && b != b'\n' && b != b'\r' {
+            only_whitespace = false;
+            break;
+        }
+    }
+
+    if only_whitespace {
+        return false;
+    }
+
     true
 }
 
