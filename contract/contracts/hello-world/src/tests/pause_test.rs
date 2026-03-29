@@ -290,7 +290,13 @@ fn test_distribute_fails_when_paused() {
     let group_id = BytesN::from_array(&test_env.env, &[1u8; 32]);
     test_env.env.mock_all_auths();
     crate::test_utils::fund_user_with_tokens(&test_env.env, &token, &creator, 10000);
-    client.create(&group_id, &String::from_str(&test_env.env, "Test Group"), &creator, &10, &token);
+    client.create(
+        &group_id,
+        &String::from_str(&test_env.env, "Test Group"),
+        &creator,
+        &10,
+        &token,
+    );
     client.pause(&test_env.admin);
     client.distribute(&group_id, &token, &100, &creator);
 }
@@ -306,7 +312,13 @@ fn test_remove_group_member_fails_when_paused() {
     let group_id = BytesN::from_array(&test_env.env, &[1u8; 32]);
     test_env.env.mock_all_auths();
     crate::test_utils::fund_user_with_tokens(&test_env.env, &token, &creator, 10000);
-    client.create(&group_id, &String::from_str(&test_env.env, "Test Group"), &creator, &10, &token);
+    client.create(
+        &group_id,
+        &String::from_str(&test_env.env, "Test Group"),
+        &creator,
+        &10,
+        &token,
+    );
     client.pause(&test_env.admin);
     client.remove_group_member(&group_id, &creator, &member);
 }
@@ -322,11 +334,20 @@ fn test_update_members_fails_when_paused() {
     let group_id = BytesN::from_array(&test_env.env, &[1u8; 32]);
     test_env.env.mock_all_auths();
     crate::test_utils::fund_user_with_tokens(&test_env.env, &token, &creator, 10000);
-    client.create(&group_id, &String::from_str(&test_env.env, "Test Group"), &creator, &10, &token);
-    
+    client.create(
+        &group_id,
+        &String::from_str(&test_env.env, "Test Group"),
+        &creator,
+        &10,
+        &token,
+    );
+
     let mut members = soroban_sdk::Vec::new(&test_env.env);
-    members.push_back(GroupMember { address: member.clone(), percentage: 100 });
-    
+    members.push_back(GroupMember {
+        address: member.clone(),
+        percentage: 100,
+    });
+
     client.pause(&test_env.admin);
     client.update_members(&group_id, &creator, &members);
 }
@@ -341,7 +362,13 @@ fn test_activate_group_fails_when_paused() {
     let group_id = BytesN::from_array(&test_env.env, &[1u8; 32]);
     test_env.env.mock_all_auths();
     crate::test_utils::fund_user_with_tokens(&test_env.env, &token, &creator, 10000);
-    client.create(&group_id, &String::from_str(&test_env.env, "Test Group"), &creator, &10, &token);
+    client.create(
+        &group_id,
+        &String::from_str(&test_env.env, "Test Group"),
+        &creator,
+        &10,
+        &token,
+    );
     client.deactivate_group(&group_id, &creator);
     client.pause(&test_env.admin);
     client.activate_group(&group_id, &creator);
@@ -357,7 +384,13 @@ fn test_deactivate_group_fails_when_paused() {
     let group_id = BytesN::from_array(&test_env.env, &[1u8; 32]);
     test_env.env.mock_all_auths();
     crate::test_utils::fund_user_with_tokens(&test_env.env, &token, &creator, 10000);
-    client.create(&group_id, &String::from_str(&test_env.env, "Test Group"), &creator, &10, &token);
+    client.create(
+        &group_id,
+        &String::from_str(&test_env.env, "Test Group"),
+        &creator,
+        &10,
+        &token,
+    );
     client.pause(&test_env.admin);
     client.deactivate_group(&group_id, &creator);
 }
@@ -372,9 +405,19 @@ fn test_update_group_name_fails_when_paused() {
     let group_id = BytesN::from_array(&test_env.env, &[1u8; 32]);
     test_env.env.mock_all_auths();
     crate::test_utils::fund_user_with_tokens(&test_env.env, &token, &creator, 10000);
-    client.create(&group_id, &String::from_str(&test_env.env, "Test Group"), &creator, &10, &token);
+    client.create(
+        &group_id,
+        &String::from_str(&test_env.env, "Test Group"),
+        &creator,
+        &10,
+        &token,
+    );
     client.pause(&test_env.admin);
-    client.update_group_name(&group_id, &creator, &String::from_str(&test_env.env, "New Name"));
+    client.update_group_name(
+        &group_id,
+        &creator,
+        &String::from_str(&test_env.env, "New Name"),
+    );
 }
 
 #[test]
@@ -387,9 +430,15 @@ fn test_delete_group_fails_when_paused() {
     let group_id = BytesN::from_array(&test_env.env, &[1u8; 32]);
     test_env.env.mock_all_auths();
     crate::test_utils::fund_user_with_tokens(&test_env.env, &token, &creator, 10000);
-    client.create(&group_id, &String::from_str(&test_env.env, "Test Group"), &creator, &10, &token);
+    client.create(
+        &group_id,
+        &String::from_str(&test_env.env, "Test Group"),
+        &creator,
+        &10,
+        &token,
+    );
     client.deactivate_group(&group_id, &creator); // must be inactive to delete usually
-    // Also requires usages = 0 usually, but pause should trigger first.
+                                                  // Also requires usages = 0 usually, but pause should trigger first.
     client.pause(&test_env.admin);
     client.delete_group(&group_id, &creator);
 }
@@ -404,7 +453,13 @@ fn test_start_fundraising_fails_when_paused() {
     let group_id = BytesN::from_array(&test_env.env, &[1u8; 32]);
     test_env.env.mock_all_auths();
     crate::test_utils::fund_user_with_tokens(&test_env.env, &token, &creator, 10000);
-    client.create(&group_id, &String::from_str(&test_env.env, "Test Group"), &creator, &10, &token);
+    client.create(
+        &group_id,
+        &String::from_str(&test_env.env, "Test Group"),
+        &creator,
+        &10,
+        &token,
+    );
     client.pause(&test_env.admin);
     client.start_fundraising(&group_id, &creator, &1000);
 }
@@ -419,7 +474,13 @@ fn test_contribute_fail_when_paused() {
     let group_id = BytesN::from_array(&test_env.env, &[1u8; 32]);
     test_env.env.mock_all_auths();
     crate::test_utils::fund_user_with_tokens(&test_env.env, &token, &creator, 10000);
-    client.create(&group_id, &String::from_str(&test_env.env, "Test Group"), &creator, &10, &token);
+    client.create(
+        &group_id,
+        &String::from_str(&test_env.env, "Test Group"),
+        &creator,
+        &10,
+        &token,
+    );
     client.start_fundraising(&group_id, &creator, &1000);
     client.pause(&test_env.admin);
     client.contribute(&group_id, &token, &100, &creator);

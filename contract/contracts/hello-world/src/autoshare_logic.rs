@@ -2640,7 +2640,11 @@ pub fn get_active_fundraisings(env: Env) -> Vec<ActiveFundraising> {
 
     for id in group_ids.iter() {
         let fundraising_key = DataKey::GroupFundraising(id.clone());
-        if let Some(config) = env.storage().persistent().get::<_, FundraisingConfig>(&fundraising_key) {
+        if let Some(config) = env
+            .storage()
+            .persistent()
+            .get::<_, FundraisingConfig>(&fundraising_key)
+        {
             if config.is_active {
                 result.push_back(ActiveFundraising {
                     group_id: id.clone(),

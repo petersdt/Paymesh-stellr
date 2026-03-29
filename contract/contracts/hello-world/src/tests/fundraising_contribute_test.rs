@@ -220,15 +220,20 @@ fn test_contribute_exceeds_target() {
     client.start_fundraising(&group_id, &creator, &target_amount);
 
     let contribution_amount = 1500i128;
-    crate::test_utils::fund_user_with_tokens(&test_env.env, &token, &contributor, contribution_amount);
-    
+    crate::test_utils::fund_user_with_tokens(
+        &test_env.env,
+        &token,
+        &contributor,
+        contribution_amount,
+    );
+
     // (2) Contribute exceeding target
     client.contribute(&group_id, &token, &contribution_amount, &contributor);
 
     let status = client.get_fundraising_status(&group_id);
     assert_eq!(status.total_raised, contribution_amount);
     // Campaign should be closed
-    assert!(!status.is_active); 
+    assert!(!status.is_active);
 
     // (8) single large contribution far exceeds target
     let earnings = client.get_member_earnings(&member1, &group_id);
@@ -263,7 +268,7 @@ fn test_contribute_after_closed() {
     crate::test_utils::fund_user_with_tokens(&test_env.env, &token, &contributor, 1500);
     // Reach target
     client.contribute(&group_id, &token, &1000, &contributor);
-    
+
     // (3) Contribution after campaign is closed
     client.contribute(&group_id, &token, &100, &contributor);
 }
@@ -294,7 +299,7 @@ fn test_fundraising_read_functions_after_target_met() {
 
     crate::test_utils::fund_user_with_tokens(&test_env.env, &token, &contributor, 1000);
     client.contribute(&group_id, &token, &1000, &contributor);
-    
+
     // (4) verify is_fundraising_target_reached
     assert!(client.is_fundraising_target_reached(&group_id));
     // (5) verify get_fundraising_remaining returns 0
@@ -332,17 +337,17 @@ fn test_multiple_small_contributions_reach_target() {
     crate::test_utils::fund_user_with_tokens(&test_env.env, &token, &contributor1, 300);
     crate::test_utils::fund_user_with_tokens(&test_env.env, &token, &contributor2, 400);
     crate::test_utils::fund_user_with_tokens(&test_env.env, &token, &contributor3, 300);
-    
+
     // (7) multiple small contributions
     client.contribute(&group_id, &token, &300, &contributor1);
     assert!(client.get_fundraising_status(&group_id).is_active);
-    
+
     client.contribute(&group_id, &token, &400, &contributor2);
     assert!(client.get_fundraising_status(&group_id).is_active);
-    
+
     // exact reach
     client.contribute(&group_id, &token, &300, &contributor3);
-    
+
     let status = client.get_fundraising_status(&group_id);
     assert_eq!(status.total_raised, 1000);
     assert!(!status.is_active);

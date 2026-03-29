@@ -173,8 +173,7 @@ fn test_total_usages_paid_reflects_creation_and_topups() {
     let initial_usages = 5u32;
     let creator = test_env.users.get(0).unwrap().clone();
     let member = Address::generate(&env);
-    let id =
-        create_single_member_group(&env, &contract, &creator, &member, initial_usages, &token);
+    let id = create_single_member_group(&env, &contract, &creator, &member, initial_usages, &token);
 
     // After creation total_usages_paid == initial_usages
     assert_eq!(client.get_total_usages_paid(&id), initial_usages);
@@ -271,8 +270,7 @@ fn test_deactivate_reactivate_preserves_usage_count() {
     let creator = test_env.users.get(0).unwrap().clone();
     let member = Address::generate(&env);
     let initial_usages = 7u32;
-    let id =
-        create_single_member_group(&env, &contract, &creator, &member, initial_usages, &token);
+    let id = create_single_member_group(&env, &contract, &creator, &member, initial_usages, &token);
 
     // Consume one usage
     let sender = test_env.users.get(1).unwrap().clone();
@@ -393,7 +391,14 @@ fn test_large_usage_count_no_overflow() {
     let large_usages: u32 = 500_000_000;
 
     // create_test_group mints (usages * 10 + 10_000) tokens for the creator
-    let id = create_test_group(&env, &contract, &creator, &Vec::new(&env), large_usages, &token);
+    let id = create_test_group(
+        &env,
+        &contract,
+        &creator,
+        &Vec::new(&env),
+        large_usages,
+        &token,
+    );
 
     let details = client.get(&id);
     assert_eq!(details.usage_count, large_usages);
