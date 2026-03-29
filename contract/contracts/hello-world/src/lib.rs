@@ -664,3 +664,7 @@ mod usage_tracking_test;
 #[cfg(test)]
 #[path = "tests/group_creation_boundary_test.rs"]
 mod group_creation_boundary_test;
+
+#[cfg(test)]
+#[path = "tests/group_lifecycle_test.rs"]
+mod group_lifecycle_test;
