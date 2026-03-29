@@ -656,3 +656,11 @@ mod group_name_validation_test;
 #[cfg(test)]
 #[path = "tests/withdraw_test.rs"]
 mod withdraw_test;
+
+#[cfg(test)]
+#[path = "tests/usage_tracking_test.rs"]
+mod usage_tracking_test;
+
+#[cfg(test)]
+#[path = "tests/group_creation_boundary_test.rs"]
+mod group_creation_boundary_test;
